@@ -16,3 +16,14 @@ Created by SmugTomato
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
+
+class MaterialDefinition:
+
+
+    def __init__(self):
+        pass
+
+
+    def read_data(self, reader):
+        pass
