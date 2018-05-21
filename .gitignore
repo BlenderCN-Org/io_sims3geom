@@ -1,0 +1,18 @@
+# Compiled python modules.
+*.pyc
+
+# Sims 2 files folder
+/sims2_files/
+
+# data output files
+/outfiles/
+/testfiles/
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
+# PNG files
+*.png
