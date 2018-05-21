@@ -16,35 +16,3 @@ Created by SmugTomato
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from .datareader import DataReader
-from .datawriter import DataWriter
-
-from .geom_data.header import GeomHeader
-
-
-class Geom:
-    """ Handle GEOM data """
-
-
-    def __init__(self, filedata):
-        self.reader = DataReader(filedata)
-
-
-    @staticmethod
-    def from_file(filepath):
-        print("Reading .simgeom file...\n")
-
-        file = open(filepath, "rb")
-        filedata = file.read()
-        file.close()
-        return(Geom(filedata))
-
-
-    def read_data(self):
-        # HEADER
-        header = GeomHeader()
-        if not header.from_file(self.reader):
-            print("Could not read GEOM file, aborting")
-            return False
-
-        return True

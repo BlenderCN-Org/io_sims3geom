@@ -19,7 +19,7 @@ Created by SmugTomato
 import struct
 
 
-class DataReader:
+class DataWriter:
     """ This class is responsible for writing data to a GEOM file """
 
 

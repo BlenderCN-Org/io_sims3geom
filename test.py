@@ -16,5 +16,13 @@ Created by SmugTomato
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from io_sims3geom.rcol.geom import Geom
+
 
 ## Testing file
+def main():
+    geomtest = Geom.from_file("testfiles/amTopShirtMuscle_lod1_0x0000000055575982.simgeom")
+    if not geomtest.read_data():
+        return
+
+main()
