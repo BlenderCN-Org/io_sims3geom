@@ -19,12 +19,14 @@ Created by SmugTomato
 from io_sims3geom.rcol.geom import Geom
 
 
-## Testing file
+# Testing file
 def main():
-    geomtest = Geom.from_file("testfiles/amTopShirtMuscle_lod1_0x0000000055575982.simgeom")
-    if not geomtest.read_data():
-        print("\nCancelled at", geomtest.reade.offset, "/", len(geomtest.reader.data))
+    # geomtest = Geom.from_file("testfiles/amTopShirtMuscle_lod1_0x0000000055575982.simgeom")
+    geomtest = Geom.from_file("testfiles/tf_rockstar.simgeom")
+    if not geomtest.read_data(strict=False):
+        print("\nCancelled at", geomtest.reader.offset, "/", len(geomtest.reader.data))
         del(geomtest)
+
         return
 
 main()

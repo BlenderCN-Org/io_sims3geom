@@ -55,7 +55,13 @@ class Geom:
         return(Geom(filedata))
 
 
-    def read_data(self):
+    def read_data(self, strict=False):
+        """
+            Read data from GEOM fileself.
+
+            Set 'strict' to 'True' to exit on unexpected TGI values,
+            by default it will print a warning, but will continue anyway.
+        """
         # <editor-fold> -- HEADER SECTION
         # RCOL Header section
         self.reader.read_int32()     # Version
@@ -67,15 +73,26 @@ class Geom:
         # GEOM files have TGI values of 0
         # TGI: Type, Group, Instance
         for _ in range(internalct):
-            if self.reader.read_uint64() != 0:
-                print("Unexpected TGI values at", hex(self.reader.offset))
-                return False
-            if self.reader.read_uint32() != 0:
-                print("Unexpected TGI values at", hex(self.reader.offset))
-                return False
-            if self.reader.read_uint32() != 0:
-                print("Unexpected TGI values at", hex(self.reader.offset))
-                return False
+            val = self.reader.read_uint64()
+            if val != 0:
+                print("Unexpected Instance value at", hex(self.reader.offset))
+                print("Expected '0x0', got '", hex(val), "'", sep="")
+                if strict:
+                    return False
+
+            val = self.reader.read_uint32()
+            if val != 0:
+                print("Unexpected Resource Type value at", hex(self.reader.offset))
+                print("Expected '0x0', got '", hex(val), "'", sep="")
+                if strict:
+                    return False
+
+            val = self.reader.read_uint32()
+            if val != 0:
+                print("Unexpected Resource Group values at", hex(self.reader.offset))
+                print("Expected '0x0', got '", hex(val), "'", sep="")
+                if strict:
+                    return False
 
         for _ in range(internalct):
             self.reader.read_uint32()    # Position of the Chunk (absolute)
