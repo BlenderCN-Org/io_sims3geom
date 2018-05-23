@@ -56,6 +56,7 @@ class Geom:
 
 
     def read_data(self):
+        # <editor-fold> -- HEADER SECTION
         # RCOL Header section
         self.reader.read_int32()     # Version
         self.reader.read_int32()     # Count of Internal Public Chunks
@@ -91,8 +92,10 @@ class Geom:
         self.reader.read_uint32()       # TGI OFFSET (From after this value)
         self.reader.read_uint32()       # TGI SIZE
         embedded_id = self.reader.read_uint32()
+        # </editor-fold> -- END HEADER SECTION
 
-        # MTNF Chunk.
+
+        # <editor-fold> -- MTNF CHUNK
         # Probably important so should be saved as property in Blender
         if embedded_id != 0:
             mtnf_parms = []
@@ -150,8 +153,10 @@ class Geom:
                 'subtype'   :_subtype,
                 'byteamount': _byteamount
             })
+        # </editor-fold> -- END MTNF CHUNK
 
-        # READ VERTEX DATA
+
+        # <editor-fold> -- VERTEX DATA
         vertices = []
         for i in range(vertcount):
             vert = {
@@ -217,9 +222,10 @@ class Geom:
             vertices.append(vert)
             # ENDLOOP
         # ENDLOOP
+        # </editor-fold> -- END VERTEX DATA
 
 
-        # READ TRIANGLES
+        # <editor-fold> -- TRIANGLES
         if self.reader.read_int32() != 1:
             print("Unsupported Itemcount at", hex(self.reader.offset))
             return False
@@ -235,11 +241,11 @@ class Geom:
             for _ in range(3):
                 tri.append(self.reader.read_int16())
             triangles.append(tri)
+        # </editor-fold> -- END TRIANGLES
 
 
+        # BONES
         skin_ctrl = self.reader.read_int32()
-
-
         bonehash_ct = self.reader.read_int32()
         bonehashes = []
         for _ in range(bonehash_ct):
@@ -267,9 +273,7 @@ class Geom:
         self.bonehashes  = bonehashes
         self.tgisets     = tgisets
 
-
+        # Return True if nothing failed
         print("Finished at", self.reader.offset, "/", len(self.reader.data))
         del(self.reader)
-
-        # Return True if nothing failed
         return True
