@@ -19,8 +19,6 @@ Created by SmugTomato
 from .datareader import DataReader
 from .datawriter import DataWriter
 
-from .geom_data.vertex import Vertex
-
 
 class Geom:
     """ Handle GEOM data """
@@ -36,6 +34,8 @@ class Geom:
     def __init__(self, filedata):
         self.reader = DataReader(filedata)
 
+        self.mergegroup  = None
+        self.sortorder   = None
         self.embedded_id = None
         self.mtnf_parms  = None
         self.vertices    = None
@@ -87,37 +87,31 @@ class Geom:
             print("Error, invalid geom file")
             return False
 
-        print("GEOM version:", self.reader.read_uint32())
-        tgi_offset = self.reader.read_uint32() + self.reader.offset
-        print("TGI Offset:", tgi_offset)
-        print("TGI Size:", self.reader.read_uint32())
+        self.reader.read_uint32()       # GEOM VERSION
+        self.reader.read_uint32()       # TGI OFFSET (From after this value)
+        self.reader.read_uint32()       # TGI SIZE
         embedded_id = self.reader.read_uint32()
-        print("EmbeddedID:", Geom.embed_materialtype[embedded_id])
 
         # MTNF Chunk.
         # Probably important so should be saved as property in Blender
         if embedded_id != 0:
             mtnf_parms = []
 
-            print("\nMTNF Chunk")
-            chunksize = self.reader.read_int32()
-            print("Chunksize:", chunksize)
-            # self.reader.offset += chunksize
-            print("MTNF:", self.reader.read_uint32() == 0x464e544d)
-            print("UNKNOWN:", self.reader.read_int32())
-            print("Datasize:", self.reader.read_int32())
+            self.reader.read_int32()        # CHUNKSIZE
+            self.reader.read_uint32()       # 'MTNF'
+            self.reader.read_int32()        # UNKNOWN
+            self.reader.read_int32()        # DATASIZE
 
             count = self.reader.read_int32()
-            print("\nCount:", count)
             for _ in range(count):
                 parm = {
-                    'hash':None,
-                    'typecode':None,
-                    'size':None,
-                    'offset':None,
-                    'data':None
+                    'hash'      :None,
+                    'typecode'  :None,
+                    'size'      :None,
+                    'offset'    :None,
+                    'data'      :None
                 }
-                parm['hash'] = self.reader.read_uint32()
+                parm['hash'] = hex(self.reader.read_uint32())
                 parm['typecode'] = self.reader.read_int32()
                 parm['size'] = self.reader.read_int32()
                 parm['offset'] = self.reader.read_int32()
@@ -139,15 +133,12 @@ class Geom:
                     p['data'] = []
                     for _ in range(p['size']):
                         p['data'].append(self.reader.read_int32())
-                print(p)
-            print()
 
-        print("Merge Group", self.reader.read_int32())
-        print("Sort Order", self.reader.read_int32())
-        vertcount = self.reader.read_int32()
-        fcount    = self.reader.read_int32()
-        print("VertexCount", vertcount)
-        print("VertexElement Count", fcount)
+        mergegroup = self.reader.read_int32()
+        sortorder  = self.reader.read_int32()
+
+        vertcount  = self.reader.read_int32()
+        fcount     = self.reader.read_int32()
 
         vertformats = []
         for i in range(fcount):
@@ -155,16 +146,24 @@ class Geom:
             _subtype  = self.reader.read_int32()
             _byteamount = self.reader.read_byte()
             vertformats.append({
-                'datatype':_datatype,
-                'subtype':_subtype,
+                'datatype'  :_datatype,
+                'subtype'   :_subtype,
                 'byteamount': _byteamount
             })
-            print(i, vertformats[i])
 
         # READ VERTEX DATA
         vertices = []
         for i in range(vertcount):
-            vert = Vertex()
+            vert = {
+                'id'        :None,
+                'position'  :None,
+                'normal'    :None,
+                'uv'        :None,
+                'bone_asn'  :None,
+                'bone_wgt'  :None,
+                'tangent'   :None,
+                'tagval'    :None
+            }
 
             for j in range(fcount):
                 type = vertformats[j]['datatype']
@@ -174,46 +173,46 @@ class Geom:
                     arr = []
                     for _ in range(3):
                         arr.append( self.reader.read_float() )
-                    vert.position = arr
+                    vert['position'] = arr
                 # NORMAL
                 elif type == 2:
                     arr = []
                     for _ in range(3):
                         arr.append( self.reader.read_float() )
-                    vert.normal = arr
+                    vert['normal'] = arr
                 # UV COORDINATES
                 elif type == 3:
                     arr = []
                     for _ in range(2):
                         arr.append( self.reader.read_float() )
-                    vert.uv = arr
+                    vert['uv'] = arr
                 # BONE ASSIGNMENTS
                 elif type == 4:
                     arr = []
                     for _ in range(4):
                         arr.append( self.reader.read_byte() )
-                    vert.bone_asn = arr
+                    vert['bone_asn'] = arr
                 # BONE WEIGHTS
                 elif type == 5:
                     arr = []
                     for _ in range(4):
                         arr.append( self.reader.read_float() )
-                    vert.bone_wgt = arr
+                    vert['bone_wgt'] = arr
                 # TANGENT
                 elif type == 6:
                     arr = []
                     for _ in range(3):
                         arr.append( self.reader.read_float() )
-                    vert.tangent = arr
+                    vert['tangent'] = arr
                 # TAGVAL
                 elif type == 7:
                     arr = []
                     for _ in range(4):
                         arr.append( self.reader.read_byte() )
-                    vert.tagval = arr
+                    vert['tagval'] = arr
                 # VERTEX ID
                 elif type == 10:
-                    vert.id = self.reader.read_int32()
+                    vert['id'] = self.reader.read_int32()
 
             vertices.append(vert)
             # ENDLOOP
@@ -245,7 +244,6 @@ class Geom:
         bonehashes = []
         for _ in range(bonehash_ct):
             bonehashes.append(self.reader.read_uint32())
-        print(bonehashes)
 
 
         # TGI SETS
@@ -257,10 +255,10 @@ class Geom:
             tgi.append(self.reader.read_uint32())
             tgi.append(self.reader.read_uint64())
             tgisets.append(tgi)
-        for t in tgisets:
-            print(t)
 
 
+        self.mergegroup  = mergegroup
+        self.sortorder   = sortorder
         self.embedded_id = embedded_id
         self.mtnf_parms  = mtnf_parms
         self.vertices    = vertices
@@ -270,7 +268,6 @@ class Geom:
         self.tgisets     = tgisets
 
 
-        print()
         print("Finished at", self.reader.offset, "/", len(self.reader.data))
         del(self.reader)
 
