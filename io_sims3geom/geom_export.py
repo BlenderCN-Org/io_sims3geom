@@ -16,15 +16,7 @@ Created by SmugTomato
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from io_sims3geom.rcol.geom import Geom
 
 
-# Testing file
-def main():
-    # geomtest = Geom.from_file("testfiles/amTopShirtMuscle_lod1_0x0000000055575982.simgeom")
-    geomtest = Geom.from_file("testfiles/tf_rockstar.simgeom")
-    if not geomtest or not geomtest.read_data(strict=False):
-        print("\nCancelled at", geomtest.reader.offset, "/", len(geomtest.reader.data))
-        return
-
-main()
+class GeomExport:
+    pass

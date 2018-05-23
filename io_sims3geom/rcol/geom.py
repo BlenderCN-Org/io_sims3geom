@@ -49,10 +49,15 @@ class Geom:
     def from_file(filepath):
         print("Reading .simgeom file...\n")
 
-        file = open(filepath, "rb")
-        filedata = file.read()
-        file.close()
-        return(Geom(filedata))
+        try:
+            file = open(filepath, "rb")
+            filedata = file.read()
+            file.close()
+        except:
+            print("Failed to open file")
+            return False
+        else:
+            return(Geom(filedata))
 
 
     def read_data(self, strict=False):
