@@ -20,6 +20,7 @@ from .datareader import DataReader
 from .datawriter import DataWriter
 
 from .geom_data.matdef import MaterialDefinition
+from .geom_data.vertex import Vertex
 
 
 class Geom:
@@ -125,7 +126,73 @@ class Geom:
                 'subtype':_subtype,
                 'byteamount': _byteamount
             })
-            print(vertformats[i])
+            print(i, vertformats[i])
+
+        # READ VERTEX DATA
+        vertices = {}
+        for i in range(vertcount):
+            vert = Vertex()
+
+            for j in range(fcount):
+                type = vertformats[j]['datatype']
+
+                # POSITION
+                if type == 1:
+                    arr = []
+                    for _ in range(3):
+                        arr.append( self.reader.read_float() )
+                    vert.position = arr
+                # NORMAL
+                elif type == 2:
+                    arr = []
+                    for _ in range(3):
+                        arr.append( self.reader.read_float() )
+                    vert.normal = arr
+                # UV COORDINATES
+                elif type == 3:
+                    arr = []
+                    for _ in range(2):
+                        arr.append( self.reader.read_float() )
+                    vert.uv = arr
+                # BONE ASSIGNMENTS
+                elif type == 4:
+                    arr = []
+                    for _ in range(4):
+                        arr.append( self.reader.read_byte() )
+                    vert.bone_asn = arr
+                # BONE WEIGHTS
+                elif type == 5:
+                    arr = []
+                    for _ in range(4):
+                        arr.append( self.reader.read_float() )
+                    vert.bone_wgt = arr
+                # TANGENT
+                elif type == 6:
+                    arr = []
+                    for _ in range(3):
+                        arr.append( self.reader.read_float() )
+                    vert.tangent = arr
+                # TAGVAL
+                elif type == 7:
+                    arr = []
+                    for _ in range(4):
+                        arr.append( self.reader.read_byte() )
+                    vert.tagval = arr
+                # VERTEX ID
+                elif type == 10:
+                    vert.id = self.reader.read_int32()
+
+            vertices[vert.id] = vert
+            # ENDLOOP
+        # ENDLOOP
+
+        
+
+
+
+
+
+
 
 
 
